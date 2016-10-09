@@ -35,7 +35,7 @@ public final class FunctionalApiTest {
     @Test
     public final void predicates_test_conditions() {
         final Predicate<String> containsPredicate = test -> test.equals("sa");
-        assertTrue(containsPredicate.test(""));
+        assertTrue(containsPredicate.test("sa"));
         assertFalse(containsPredicate.test(""));
 
         // Composition:
@@ -43,51 +43,53 @@ public final class FunctionalApiTest {
 
         final Predicate<String> nullPredicate = (test -> test == null);
         assertFalse(nullPredicate.or(containsPredicate).test(""));
-        assertTrue(nullPredicate.or(containsPredicate).test(""));
+        assertTrue(nullPredicate.or(containsPredicate).test(null));
 
         // FIXME: To think
         // FIXME: assertWHAT?(nullPredicate.or(containsPredicate).test(null));
         // FIXME Uncomment and explain error assertTrue(containsPredicate.or(nullPredicate).test(null));
+        // Se le pasa el resultado de hacer nullPredicate.test(null) a containsPredicate, esto es un boolean no un String
     }
 
     @Test
     public final void consumer_uses_received_values() {
         final Consumer<String> consumer = (value) -> assertEquals("sa", value);
-        consumer.accept("");
+        consumer.accept("sa");
         // Composition can make a "chain" of responsibility
-        consumer.andThen((value) -> System.out.println(value)).accept("");
+        consumer.andThen((value) -> System.out.println(value)).accept("sa");
     }
 
     @Test
     public final void function_reives_and_returns_values() {
         final Function<String, Integer> intValue = (x -> Integer.parseInt(x));
-        assertEquals(new Integer(0), intValue.apply("3"));
+        assertEquals(new Integer(0), intValue.apply("0"));
+        assertEquals(new Integer(3), intValue.apply("3"));
         // composition
-        assertEquals(new Integer(0), intValue.andThen(x -> x + 1).apply("3"));
-        assertEquals(new Integer(0), intValue.compose(x -> x + "1").apply("3"));
+        assertEquals(new Integer(4), intValue.andThen(x -> x + 1).apply("3"));
+        assertEquals(new Integer(31), intValue.compose(x -> x + "1").apply("3"));
     }
 
     @Test
     public final void supplier_returns_a_value() {
         final Supplier<Integer> supplier = () -> 1;
-        assertEquals(new Integer(0), supplier.get());
+        assertEquals(new Integer(1), supplier.get());
     }
 
     @Test
     public final void unary_operator_receives_one_value() {
         final UnaryOperator<Integer> inc = (x -> x + 1);
-        assertEquals(new Integer(0), inc.apply(3));
+        assertEquals(new Integer(4), inc.apply(3));
         // Composition:
-        assertEquals(new Integer(0), inc.andThen(x -> x * 2).apply(3));
-        assertEquals(new Integer(0), inc.compose((final Integer x) -> x * 2).apply(3)); // FIXME why the type for x?
+        assertEquals(new Integer(8), inc.andThen(x -> x * 2).apply(3));
+        assertEquals(new Integer(7), inc.compose((final Integer x) -> x * 2).apply(3)); // FIXME why the type for x?
     }
 
     @Test
     public final void binary_operator_receives_two_values() {
         final BinaryOperator<Integer> adder = (x, y) -> x + y;
-        assertEquals(new Integer(0), adder.apply(4, 5));
+        assertEquals(new Integer(9), adder.apply(4, 5));
         // Composition (receives a Function not an operator
-        assertEquals(new Integer(0), adder.andThen((x) -> x * 2).apply(4, 5));
+        assertEquals(new Integer(18), adder.andThen((x) -> x * 2).apply(4, 5));
     }
 
     @Test
@@ -95,7 +97,7 @@ public final class FunctionalApiTest {
         final DoublePredicate pressisionPredicate = x -> x < 0.001;
         assertFalse(pressisionPredicate.test(0.3));
         final IntBinaryOperator binaryOperator = (x, y) -> x - y;
-        assertEquals(-3, binaryOperator.applyAsInt(1, 2));
+        assertEquals(-3, binaryOperator.applyAsInt(1, 4));
         // Many more...
     }
 
@@ -103,6 +105,6 @@ public final class FunctionalApiTest {
     public final void functional_interface_annotation() {
         @SuppressWarnings("unused")
         final NonFunctionalInterface interFace = mock(NonFunctionalInterface.class);
-        fail("go to the interface and comment the method to check the annotation function, then erase this instruction");
+        //fail("go to the interface and comment the method to check the annotation function, then erase this instruction");
     }
 }

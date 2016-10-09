@@ -37,26 +37,26 @@ public class StreamCollectTest {
     @Test
     public void collect_with_consumer() {
         final double average = ages.collect(Averager::new, Averager::accept, Averager::combine).average();
-        assertEquals("what's  the average", new Double(0), average, 0.001);
+        assertEquals("what's  the average", new Double(31), average, 0.001);
     }
 
     @Test
     public final void average_with_collector() {
         final Double averege = ages.collect(Collectors.averagingInt(x -> x));
-        assertEquals("what's  the average", new Double(0), averege, 0.001);
+        assertEquals("what's  the average", new Double(31), averege, 0.001);
     }
 
     @Test
     public final void sum_with_collector() {
         final Integer sum = ages.collect(Collectors.summingInt(x -> x));
-        assertEquals("what's the sum", new Integer(0), sum);
+        assertEquals("what's the sum", new Integer(217), sum);
     }
 
     @Test
     public final void joining_with_collector() {
         final Stream<String> words = Stream.of("this", "is", "a", "phrase");
         final String phrase = words.collect(Collectors.joining(", "));
-        assertEquals("what's the phrase", "", phrase);
+        assertEquals("what's the phrase", "this, is, a, phrase", phrase);
     }
 
     @Test
@@ -68,28 +68,28 @@ public class StreamCollectTest {
         final Map<Sex, List<Person>> divided = roster.stream().collect(
                 Collectors.groupingBy(Person::getGender));
 
-        assertEquals("which are females", Arrays.asList(), divided.get(Sex.FEMALE));
-        assertEquals("which are males", Arrays.asList(), divided.get(Sex.MALE));
+        assertEquals("which are females", roster.stream().filter(p -> p.getGender() == Sex.FEMALE).collect(Collectors.toList()), divided.get(Sex.FEMALE));
+        assertEquals("which are males", roster.stream().filter(p -> p.getGender() == Sex.MALE).collect(Collectors.toList()), divided.get(Sex.MALE));
     }
 
     @Test
     public final void partitioning_with_collector() {
         final Map<Boolean, List<Integer>> map = ages.collect(Collectors.partitioningBy(x -> x < 22));
 
-        assertEquals("which are less than 22", Arrays.asList(), map.get(true));
-        assertEquals("which are more than 22", Arrays.asList(), map.get(false));
+        assertEquals("which are less than 22", Arrays.asList(5, 12, 15), map.get(true));
+        assertEquals("which are more than 22", Arrays.asList(33, 23, 51, 78), map.get(false));
     }
 
     @Test
     public final void collect_a_list_with_collectors_consumer() {
         final List<Integer> agesList = ages.collect(Collectors.toList());
-        assertEquals("what are the elements of the list", Arrays.asList(), agesList);
+        assertEquals("what are the elements of the list", Arrays.asList(5, 12, 33, 23, 51, 78, 15), agesList);
     }
 
     @Test
     public final void collect_a_list_with_consumer() {
         final ArrayList<Integer> agesList = ages.collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-        assertEquals("what are the elements of the list", Arrays.asList(), agesList);
+        assertEquals("what are the elements of the list", Arrays.asList(5, 12, 33, 23, 51, 78, 15), agesList);
     }
 }
 

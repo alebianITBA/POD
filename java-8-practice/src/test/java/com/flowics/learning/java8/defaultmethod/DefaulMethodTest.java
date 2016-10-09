@@ -23,14 +23,14 @@ public class DefaulMethodTest {
         final BaseHelloInterfaz imp = new BaseHelloInterfaz() {
         };
 
-        assertEquals("", imp.hello());
+        assertEquals("Hello Base", imp.hello());
     }
 
     @Test
     public final void overrided_default_method() {
         final OverridingHelloInterface imp = new OverridingHelloInterface() {
         };
-        assertEquals("", imp.hello());
+        assertEquals("Override Hello", imp.hello());
     }
 
     @Test
@@ -43,23 +43,23 @@ public class DefaulMethodTest {
             }
 
         };
-        assertEquals("", imp.hello());
+        assertEquals("local hello", imp.hello());
     }
 
     @Test
     public final void dependant_interface_conflict_resolution() {
-        assertEquals("", new MultipleInheritanceInterfaceHello().hello());
-        assertEquals("", new ReversedMultipleInheritanceInterfaceHello().hello());
+        assertEquals("Override Hello", new MultipleInheritanceInterfaceHello().hello());
+        assertEquals("Override Hello", new ReversedMultipleInheritanceInterfaceHello().hello());
     }
 
     @Test
     public final void conflict_class_interface_class_wins() {
-        assertEquals("", new ClassInterfaceConflictingHello().hello());
+        assertEquals("Hello Class", new ClassInterfaceConflictingHello().hello());
     }
 
     @Test
     public final void conflict_two_interfaces_override_needed() {
         // FIXME go to the class and delete the method implemented to check the error due to the conflict
-        assertEquals("", new ConflictingInterfacesHello().hello());
+        assertEquals("Override Hello Hello Conflict", new ConflictingInterfacesHello().hello());
     }
 }

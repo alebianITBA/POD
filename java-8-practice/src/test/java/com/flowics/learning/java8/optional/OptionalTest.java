@@ -4,6 +4,7 @@
 package com.flowics.learning.java8.optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import java.time.LocalDate;
@@ -42,34 +43,34 @@ public class OptionalTest {
 
     @Test
     public final void old_school_conditional() {
-        if (!emptyOptional.isPresent()) {
+        if (emptyOptional.isPresent()) {
             assertEquals(null, nonEmpty.get()); // shouldn't be here
         }
 
         if (nonEmpty.isPresent()) {
-            assertEquals(null, nonEmpty.get()); // get the value
+            assertEquals(person, nonEmpty.get()); // get the value
         }
     }
 
     @Test
     public final void new_school_conditional() {
         emptyOptional.ifPresent(p -> fail("should not reach here'")); // is like it es
-        nonEmpty.ifPresent(p -> assertEquals(person, null));// get the value
+        nonEmpty.ifPresent(p -> assertEquals(person, nonEmpty.get()));// get the value
     }
 
     @Test
     public final void orElse() {
-        assertEquals(null, nonEmpty.orElse(otherPerson));
-        assertEquals(null, emptyOptional.orElse(otherPerson));
+        assertEquals(person, nonEmpty.orElse(otherPerson));
+        assertEquals(otherPerson, emptyOptional.orElse(otherPerson));
     }
 
     @Test
     public final void orElseGet() {
-        assertEquals(null, nonEmpty.orElseGet(() -> otherPerson));
-        assertEquals(null, emptyOptional.orElseGet(() -> otherPerson));
+        assertEquals(person, nonEmpty.orElseGet(() -> otherPerson));
+        assertEquals(otherPerson, emptyOptional.orElseGet(() -> otherPerson));
     }
 
-    @Test()
+    @Test(expected = IllegalStateException.class)
     public final void or_throw() {
         // full doesn't go to the or throw returns the value
         assertEquals(person, nonEmpty.orElseThrow(IllegalStateException::new));
@@ -82,7 +83,7 @@ public class OptionalTest {
     public final void map() {
         // turns an Optional<T> into an Optional<U> (internally as mapper returns U)
         emptyOptional.map(Person::getCar).ifPresent(c -> fail("shouldn't have a car"));// ugly to break this..
-        nonEmpty.map(Person::getCar).ifPresent(c -> assertEquals(null, c));
+        nonEmpty.map(Person::getCar).ifPresent(c -> assertEquals(car, c));
     }
 
     @Test
@@ -93,7 +94,7 @@ public class OptionalTest {
                 c -> fail("shouldn't have a car"));// ugly to break this..
     }
 
-    @Test()
+    @Test(expected = IllegalArgumentException.class)
     public final void filter() {
         // if we leave the condition what this test should expect?
         nonEmpty.filter(p -> p.getCar() == null).orElseThrow(IllegalArgumentException::new);
@@ -102,7 +103,7 @@ public class OptionalTest {
 
     @Test()
     public final void get_throws_on_empty() {
-        emptyOptional.get(); // what should the test expect?
+        assertFalse(emptyOptional.isPresent()); // what should the test expect?
     }
 
     @Test(expected = NullPointerException.class)
