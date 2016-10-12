@@ -17,10 +17,12 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public void subscribe(ClientHandle handle, String genre) throws RemoteException {
-        if (!observers.containsKey(genre)) {
-            observers.put(genre, new ArrayList<>());
+        synchronized (observers) {
+            if (!observers.containsKey(genre)) {
+                observers.put(genre, new ArrayList<>());
+            }
+            observers.get(genre).add(handle);
         }
-        observers.get(genre).add(handle);
     }
 
     public void start() {
@@ -29,14 +31,17 @@ public class MovieServiceImpl implements MovieService {
             database.keySet().forEach(genre -> {
                 database.get(genre).forEach(movie -> {
                     Optional.ofNullable(observers.get(genre)).ifPresent(clients -> {
-                        clients.forEach(client -> {
+                        Iterator it = clients.iterator();
+                        while (it.hasNext()) {
+                            ClientHandle client = (ClientHandle) it.next();
                             try {
                                 client.notify(movie.getName());
                                 Thread.sleep(1 * 1000);
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                it.remove();
+                                System.out.println("Client removed");
                             }
-                        });
+                        }
                     });
                 });
             });
@@ -48,9 +53,11 @@ public class MovieServiceImpl implements MovieService {
     }
 
     public void addMovie(Movie movie) {
-        if (!database.containsKey(movie.getGenre())) {
-            database.put(movie.getGenre(), new ArrayList<>());
+        synchronized (database) {
+            if (!database.containsKey(movie.getGenre())) {
+                database.put(movie.getGenre(), new ArrayList<>());
+            }
+            database.get(movie.getGenre()).add(movie);
         }
-        database.get(movie.getGenre()).add(movie);
     }
 }
