@@ -21,7 +21,9 @@ public class MovieServiceImpl implements MovieService {
             if (!observers.containsKey(genre)) {
                 observers.put(genre, new ArrayList<>());
             }
-            observers.get(genre).add(handle);
+            synchronized (observers.get(genre)) {
+                observers.get(genre).add(handle);
+            }
         }
     }
 
@@ -31,15 +33,17 @@ public class MovieServiceImpl implements MovieService {
             database.keySet().forEach(genre -> {
                 database.get(genre).forEach(movie -> {
                     Optional.ofNullable(observers.get(genre)).ifPresent(clients -> {
-                        Iterator it = clients.iterator();
-                        while (it.hasNext()) {
-                            ClientHandle client = (ClientHandle) it.next();
-                            try {
-                                client.notify(movie.getName());
-                                Thread.sleep(1 * 1000);
-                            } catch (Exception e) {
-                                it.remove();
-                                System.out.println("Client removed");
+                        synchronized (clients) {
+                            Iterator it = clients.iterator();
+                            while (it.hasNext()) {
+                                ClientHandle client = (ClientHandle) it.next();
+                                try {
+                                    client.notify(movie.getName());
+                                    Thread.sleep(1 * 1000);
+                                } catch (Exception e) {
+                                    it.remove();
+                                    System.out.println("Client removed");
+                                }
                             }
                         }
                     });
